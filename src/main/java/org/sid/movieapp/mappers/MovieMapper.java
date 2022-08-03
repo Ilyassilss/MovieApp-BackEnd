@@ -1,13 +1,13 @@
 package org.sid.movieapp.mappers;
 
-import org.mapstruct.InjectionStrategy;
+import java.util.Set;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 import org.sid.movieapp.entities.Movie;
 import org.sid.movieapp.models.requests.MovieRequest;
+import org.sid.movieapp.models.responses.MovieResponse;
 import org.sid.movieapp.models.responses.MovieResponseCover;
-
-import java.util.Set;
 
 @Mapper(componentModel = "spring")
 public interface MovieMapper {
@@ -20,4 +20,6 @@ public interface MovieMapper {
     Movie requestToEntity(MovieRequest movieRequest);
 
     MovieResponseCover entityToResponse(Movie movie);
+
+	MovieResponse entityToResponses(Movie movie);
 }

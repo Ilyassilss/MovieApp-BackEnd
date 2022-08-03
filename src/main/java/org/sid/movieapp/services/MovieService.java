@@ -1,30 +1,32 @@
 package org.sid.movieapp.services;
 
+
+import java.util.List;
+import java.util.Map;
+
 import org.sid.movieapp.entities.Movie;
-import org.sid.movieapp.exceptions.AlreadyExistsException;
-import org.sid.movieapp.exceptions.NotFoundException;
 import org.sid.movieapp.models.requests.MovieRequest;
+import org.sid.movieapp.models.responses.MovieResponse;
 import org.sid.movieapp.models.responses.MovieResponseCover;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-import java.util.Map;
-import java.util.Set;
-
 public interface MovieService {
-    MovieResponseCover add(MovieRequest movieRequest) throws AlreadyExistsException;
+	MovieResponse add(MovieRequest movie);
 
-    Set<MovieResponseCover> get();
+	List<MovieResponse> getAll();
 
-    MovieResponseCover get(Long id) throws NotFoundException;
+	List<MovieResponseCover> getAllWithCover();
+	
+	Page<MovieResponseCover> getAllWithCoverPaginations(Pageable pageable);
 
-    MovieResponseCover update(Long id , MovieRequest movieRequest)throws  NotFoundException;
+	Map<String, Object> getAllWithCoverPaginations(String title,Pageable pageable);
 
-    void delete(Long id);
+	MovieResponse get(Long id);
 
-    Set<MovieResponseCover> getAllWithCover();
+	void delete(Long id);
 
-    Page<Movie> getAllPaginations(Pageable pageable);
+	MovieResponse update(Long id, MovieRequest movie);
 
-    Map<String,Object> getAllWithCoverPaginations(String title , Pageable pageable);
+	Page<Movie> getAllPaginations(Pageable pageable);
 }

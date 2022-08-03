@@ -9,4 +9,6 @@ import java.util.Optional;
 @Repository
 public interface ActorRepository extends JpaRepository<Actor,Long> {
     Optional<Actor> findByFirstNameAndLastName(String firstName, String lastName);
+
+	Optional<Actor> findByFirstName(String firstName);
 }

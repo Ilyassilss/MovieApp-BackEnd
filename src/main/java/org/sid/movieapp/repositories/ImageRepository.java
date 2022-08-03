@@ -1,5 +1,7 @@
 package org.sid.movieapp.repositories;
 
+import java.util.Optional;
+
 import org.sid.movieapp.entities.Image;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -12,4 +14,6 @@ public interface ImageRepository extends JpaRepository<Image,String> {
     @Modifying
     @Query("UPDATE Image i SET i.isCover=0 WHERE i.movie.id= :movie_id")
     Integer updateAllCover(@Param("movie_id") Long movieId);
+
+	Optional<Image> findByImageLink(String imageLink);
 }
