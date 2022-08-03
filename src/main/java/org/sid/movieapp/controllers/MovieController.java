@@ -1,9 +1,15 @@
 package org.sid.movieapp.controllers;
 
+import java.util.List;
+import java.util.Map;
+
+import javax.validation.Valid;
+
 import org.sid.movieapp.entities.Movie;
 import org.sid.movieapp.exceptions.AlreadyExistsException;
 import org.sid.movieapp.exceptions.NotFoundException;
 import org.sid.movieapp.models.requests.MovieRequest;
+import org.sid.movieapp.models.responses.MovieResponse;
 import org.sid.movieapp.models.responses.MovieResponseCover;
 import org.sid.movieapp.services.MovieService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,11 +18,16 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.util.Map;
-import java.util.Set;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @CrossOrigin(origins = { "http://localhost:4200" })
@@ -26,9 +37,9 @@ public class MovieController {
     private MovieService movieService;
 
     @PostMapping("/add")
-    public ResponseEntity<MovieResponseCover> add(@RequestBody @Valid MovieRequest movieRequest) throws AlreadyExistsException {
-        MovieResponseCover movie = movieService.add(movieRequest);
-        return new ResponseEntity<MovieResponseCover>(movie, HttpStatus.CREATED);
+    public ResponseEntity<MovieResponse> add(@RequestBody @Valid MovieRequest movieRequest) throws AlreadyExistsException {
+        MovieResponse movie = movieService.add(movieRequest);
+        return new ResponseEntity<MovieResponse>(movie, HttpStatus.CREATED);
     }
 
     @GetMapping("/all")
@@ -41,7 +52,7 @@ public class MovieController {
                 (movieService.getAllWithCoverPaginations(title, pageable), HttpStatus.OK);
     }
 
-    @GetMapping("allOld")
+    @GetMapping("/allOld")
     public ResponseEntity<Page<Movie>> getPaginationsOld(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "3") int size){
@@ -51,14 +62,14 @@ public class MovieController {
     }
 
     @GetMapping
-    public ResponseEntity<Set<MovieResponseCover>> get(){
-        return new ResponseEntity<Set<MovieResponseCover>>
-                (movieService.get(),HttpStatus.OK);
+    public ResponseEntity<List<MovieResponse>> get(){
+        return new ResponseEntity<List<MovieResponse>>
+                (movieService.getAll(),HttpStatus.OK);
     }
 
     @GetMapping("/home")
-    public ResponseEntity<Set<MovieResponseCover>> getWithCover(){
-        return new ResponseEntity<Set<MovieResponseCover>>
+    public ResponseEntity<List<MovieResponseCover>> getWithCover(){
+        return new ResponseEntity<List<MovieResponseCover>>
                 (movieService.getAllWithCover(),HttpStatus.OK);
     }
 
@@ -69,14 +80,14 @@ public class MovieController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MovieResponseCover> update(@PathVariable Long id ,@RequestBody MovieRequest movie) throws NotFoundException {
-        return new ResponseEntity<MovieResponseCover>
+    public ResponseEntity<MovieResponse> update(@PathVariable Long id ,@RequestBody MovieRequest movie) throws NotFoundException {
+        return new ResponseEntity<MovieResponse>
                 (movieService.update(id,movie),HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MovieResponseCover> get(@PathVariable Long id) throws NotFoundException {
-        return new ResponseEntity<MovieResponseCover>
+    public ResponseEntity<MovieResponse> get(@PathVariable Long id) throws NotFoundException {
+        return new ResponseEntity<MovieResponse>
                 (movieService.get(id),HttpStatus.OK);
     }
 }

@@ -1,18 +1,28 @@
 package org.sid.movieapp.entities;
 
+import java.util.List;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.Table;
+
 import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-
-import javax.persistence.*;
-import java.util.List;
-import java.util.Set;
+import lombok.Setter;
 
 @Entity
 @Table(name = "category")
-@Data @AllArgsConstructor @NoArgsConstructor
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class Category {
     @Id @GeneratedValue(strategy = GenerationType.AUTO)

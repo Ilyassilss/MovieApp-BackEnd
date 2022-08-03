@@ -6,8 +6,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import javax.transaction.Transactional;
 
@@ -16,14 +14,14 @@ import org.sid.movieapp.entities.Category;
 import org.sid.movieapp.entities.Director;
 import org.sid.movieapp.entities.Image;
 import org.sid.movieapp.entities.Movie;
-import org.sid.movieapp.exceptions.AlreadyExistsException;
-import org.sid.movieapp.exceptions.NotFoundException;
 import org.sid.movieapp.mappers.ActorMapper;
 import org.sid.movieapp.mappers.CategoryMapper;
 import org.sid.movieapp.mappers.DirectorMapper;
+import org.sid.movieapp.mappers.ImageMapper;
 import org.sid.movieapp.mappers.MovieMapper;
 import org.sid.movieapp.models.requests.MovieRequest;
 import org.sid.movieapp.models.responses.ImageResponse;
+import org.sid.movieapp.models.responses.MovieResponse;
 import org.sid.movieapp.models.responses.MovieResponseCover;
 import org.sid.movieapp.repositories.ActorRepository;
 import org.sid.movieapp.repositories.CategoryRepository;
@@ -33,243 +31,232 @@ import org.sid.movieapp.repositories.MovieRepository;
 import org.sid.movieapp.services.MovieService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
 @Service
 public class MovieServiceImpl implements MovieService {
 
-    @Autowired
-    private MovieRepository movieRepository ;
+	@Autowired // l'injection des dependences
+	MovieRepository movieRepository;
 
-    @Autowired
-    private DirectorRepository directorRepository ;
+	@Autowired
+	DirectorRepository directorRepository;
 
-    @Autowired
-    private ActorRepository actorRepository ;
+	@Autowired
+	CategoryRepository categorieRepository;
 
-    @Autowired
-    private CategoryRepository categoryRepository ;
+	@Autowired
+	ImageRepository imageRepository;
 
-    @Autowired
-    private ImageRepository imageRepository ;
+	@Autowired
+	ActorRepository actorRepository;
 
-    @Transactional
-    @Override
-    public MovieResponseCover add(MovieRequest movieRequest) throws AlreadyExistsException{
-        Optional<Movie> findmovie = movieRepository.findByTitle(movieRequest.getTitle());
-        if(findmovie.isPresent()){
-            throw new AlreadyExistsException(movieRequest.getTitle(),Movie.class.getSimpleName());
-        }else{
+	@Autowired
+	MovieMapper mapper;
 
-            Movie movie = new Movie();
+	@Autowired
+	ActorMapper actorMapper;
 
-            movie.setActors(new HashSet<>());
-            movie.setCategories(new HashSet<>());
-            movie.setImages(new HashSet<>());
+	@Autowired
+	CategoryMapper categorieMapper;
 
-            movie.setTitle(movieRequest.getTitle());
-            movie.setDescription(movieRequest.getDescription());
-            movieRepository.save(movie);
-            Optional<Director> findDirector = directorRepository.findByName(movieRequest.getDirector().getName());
-            // DIRECTOR //
-            if(!findDirector.isPresent()){
-                Director director = Director.builder()
-                        .name(movieRequest.getDirector().getName())
-                        .phone(movieRequest.getDirector().getPhone())
-                        .build();
-                directorRepository.save(director);
+	@Autowired
+	ImageMapper imageMapper;
 
-                movie.setDirector(director);
-            } else movie.setDirector(findDirector.get());
+	@Transactional
+	@Override
+	public MovieResponse add(MovieRequest movie) {
 
-            // ACTOR //
-            if(movieRequest.getActors() != null && !movieRequest.getActors().isEmpty()){
-                movieRequest.getActors().forEach(actor -> {
-                    Optional<Actor> findActor = actorRepository.findByFirstNameAndLastName(actor.getFirstName(),actor.getLastName());
-                    if(!findActor.isPresent()){
-                        Actor act = Actor.builder()
-                                .firstName(actor.getFirstName())
-                                .lastName(actor.getLastName())
-                                .age(actor.getAge())
-                                .photoLink(actor.getPhotoLink())
-                                .build();
-                        actorRepository.save(act);
-                        movie.getActors().add(act);
-                    }else{
-                        movie.getActors().add(findActor.get());
-                    }
+		Optional<Movie> findMovie = movieRepository.findByTitle(movie.getTitle());
+		if (findMovie.isPresent())
+			throw new RuntimeException("Movie exists");
 
-                });
-            }
+		Optional<Director> findDirector = directorRepository.findByName(movie.getDirector().getName());
+		Movie newMovie = Movie.builder().title(movie.getTitle()).description(movie.getDescription()).build();
 
-            // CATEGORY //
-            if(movieRequest.getCategories() != null && !movieRequest.getCategories().isEmpty()){
-                movieRequest.getCategories().forEach(category -> {
-                    Optional<Category> findCategory = categoryRepository.findByName(category.getName());
-                    if(!findCategory.isPresent()){
-                        Category cat = Category.builder()
-                                .name(category.getName())
-                                .description(category.getDescription())
-                                .build();
-                        categoryRepository.save(cat);
-                        movie.getCategories().add(cat);
-                    }else{
-                        movie.getCategories().add(findCategory.get());
-                    }
+		movieRepository.save(newMovie);
+		newMovie.setActors(new HashSet<>());
+		newMovie.setCategories(new HashSet<>());
 
-                });
-            }
+		if (movie.getCategories() != null && !movie.getCategories().isEmpty()) {
+			movie.getCategories().forEach(cat -> {
+				Optional<Category> findCat = categorieRepository.findByName(cat.getName());
+				if (categorieRepository.findByName(cat.getName()).isPresent()) {
+					newMovie.getCategories().add(findCat.get());
+				} else {
+					Category categorie = Category.builder().description(cat.getDescription())
+							.name(cat.getName()).build();
+					newMovie.getCategories().add(categorie);
+					//cat.setMovies(Collections.singletonList(newMovie));
+					categorieRepository.save(categorie);
+				}
+			});
+		}
 
-            // IMAGE //
-            if(movieRequest.getImages() != null && movieRequest.getImages().isEmpty()){
-                movieRequest.getImages().forEach(image -> {
-                    Optional<Image> findImage = imageRepository.findById(image.getId());
-                    if(!findImage.isPresent()){
-                        Image img = Image.builder()
-                                .fileName(image.getFileName())
-                                .file(image.getFile())
-                                .isCover(image.getIsCover())
-                                .imageType(image.getImageType())
-                                .build();
-                        imageRepository.save(img);
-                        movie.getImages().add(img);
-                    }else{
-                        movie.getImages().add(findImage.get());
-                    }
-                });
-            }
-            return MovieMapper.INSTANCE.entityToResponse(movieRepository.save(movie));
-        }
+		if (movie.getActors() != null && !movie.getActors().isEmpty()) {
+			movie.getActors().forEach(act -> {
+				Optional<Actor> findActor = actorRepository.findByFirstName(act.getFirstName());
+				if (findActor.isPresent()) {
+					newMovie.getActors().add(findActor.get());
+				} else {
+					Actor actor = Actor.builder().firstName(act.getFirstName()).lastName(act.getLastName())
+							.age(act.getAge()).photoLink(act.getPhotoLink()).build();
+					newMovie.getActors().add(actor);
+					actorRepository.save(actor);
+				}
+			});
+		}
 
-    }
+		if (movie.getImages() != null && !movie.getImages().isEmpty()) {
+			newMovie.setImages(ImageMapper.INSTANCE.mapImages(movie.getImages()));
+			movie.getImages().forEach(img -> {
+				Optional<Image> image = imageRepository.findByImageLink(img.getImageLink());
+				if (!image.isPresent()) {
+					image.get().setMovie(newMovie);
+					imageRepository.save(image.get());
+				}
+			});
+		}
 
-    @Override
-    public Set<MovieResponseCover> get() {
-        return MovieMapper.INSTANCE.mapMovie(movieRepository.findAll().stream().collect(Collectors.toSet())) ;
-    }
+		if (findDirector.isPresent()) {
+			newMovie.setDirector(findDirector.get());
+		} else {
+			Director director = Director.builder().name(movie.getDirector().getName())
+					.phone(movie.getDirector().getPhone()).build();
+			directorRepository.save(director);
+			newMovie.setDirector(director);
+		}
 
-    @Override
-    public MovieResponseCover get(Long id) throws NotFoundException{
-        Optional<Movie> findMovie = movieRepository.findById(id);
-        if(!findMovie.isPresent())
-            throw new NotFoundException(Movie.class.getSimpleName());
-        return MovieMapper.INSTANCE.entityToResponse(findMovie.get());
-    }
+		return mapper.entityToResponses(newMovie);
+	}
 
-    @Override
-    public MovieResponseCover update(Long id, MovieRequest movieRequest) throws NotFoundException {
-        Optional<Movie> findMovie = movieRepository.findById(id);
-        if(findMovie.isPresent()){
-            findMovie.get().setDescription(movieRequest.getDescription());
-            findMovie.get().setTitle(movieRequest.getTitle());
+	@Override
+	public List<MovieResponse> getAll() {
 
-            Optional<Director> findDirector = directorRepository.findByName(movieRequest.getDirector().getName());
-            if(findDirector.isPresent()) findMovie.get()
-                    .setDirector(findDirector.get());
+		List<Movie> movies = movieRepository.findAll();
+		List<MovieResponse> newMovies = new ArrayList<>();
+		movies.forEach(movie -> {
+			newMovies.add(mapper.entityToResponses(movie));
+		});
+		return newMovies;
 
+	}
+	
+	@Override
+	public Page<Movie> getAllPaginations(Pageable pageable) {
 
-            if(movieRequest.getActors() != null && !movieRequest.getActors().isEmpty()){
-                movieRequest.getActors().forEach(actor -> {
-                    if(!actorRepository.findByFirstNameAndLastName(actor.getFirstName(), actor.getLastName()).isPresent()){
-                        actorRepository.save(ActorMapper.INSTANCE.requestToEntity(actor));
-                    }
-                    findMovie.get().getActors().add(ActorMapper.INSTANCE.requestToEntity(actor));
-                });
-            }else {
-                // keeping the same actors
-                findMovie.get().setActors(findMovie.get().getActors());
-            }
+		return movieRepository.findAll(pageable);
+	}
 
-            if(movieRequest.getCategories() != null && !movieRequest.getCategories().isEmpty()){
-                movieRequest.getCategories().forEach( category -> {
-                    if(!categoryRepository.findByName(category.getName()).isPresent()){
-                        categoryRepository.save(CategoryMapper.INSTANCE.requestToEntity(category));
-                    }
-                    findMovie.get().getCategories().add(CategoryMapper.INSTANCE.requestToEntity(category));
-                });
-            }else {
-                findMovie.get().setCategories(findMovie.get().getCategories());
-            }
+	@Override
+	public Page<MovieResponseCover> getAllWithCoverPaginations(Pageable pageable) {
+		List<MovieResponseCover> movieCovers= this.getAllWithCover();
+		final int start = (int)pageable.getOffset();
+		final int end = Math.min((start + pageable.getPageSize()), movieCovers.size());
+		return new PageImpl<>(movieCovers.subList(start, end),pageable,movieCovers.size());
+	}
 
+	@Override
+	public MovieResponse get(Long id) {
+		return mapper.entityToResponses(movieRepository.findById(id).get());
+	}
 
+	@Override
+	public void delete(Long id) {
+		movieRepository.deleteById(id);
+	}
 
-            return MovieMapper.INSTANCE.entityToResponse(movieRepository.save(findMovie.get())) ;
-        }
-        throw new NotFoundException(Movie.class.getSimpleName());
-    }
+	@Override
+	public MovieResponse update(Long id, MovieRequest movie) {
 
-    @Override
-    public void delete(Long id) {
-        movieRepository.deleteById(id);
-    }
+		Movie movieup = movieRepository.findById(id).get();
+		Optional<Director> findDirector = directorRepository.findByName(movie.getDirector().getName());
+		movieup.setTitle(movie.getTitle());
+		movieup.setDescription(movie.getDescription());
 
-    @Override
-    public Set<MovieResponseCover> getAllWithCover() {
-        List<MovieResponseCover> movieResponseCovers = new ArrayList<>();
-        movieRepository.findAll().forEach(movie -> {
-            MovieResponseCover movieResponseCover = MovieResponseCover.builder()
-                    .id(movie.getId())
-                    .title(movie.getDescription())
-                    .description(movie.getDescription())
-                    .director(DirectorMapper.INSTANCE.entityToResponse(movie.getDirector()))
-                    .timestamp(movie.getTimestamp())
-                    .build();
-            Optional<Image> cover = movie.getImages().stream()
-                    .filter(Image::getIsCover).findFirst();
-            if(cover.isPresent()){
-                ImageResponse coverResponse = ImageResponse.builder()
-                        .id(cover.get().getId())
-                        .imageLink(cover.get().getImageLink())
-                        .imageName(cover.get().getFileName())
-                        .imageType(cover.get().getImageType())
-                        .build();
-                movieResponseCover.setCover(coverResponse);
-                movieResponseCovers.add(movieResponseCover);
-            }
-        });
+		if (findDirector.isPresent()) {
+			movieup.setDirector(findDirector.get());
+		}
+		if (movie.getActors() == null)
+			movieup.setActors(movieup.getActors());
+		else
+			movieup.setActors(ActorMapper.INSTANCE.mapActors(movie.getActors()));
+		if (movie.getCategories() == null)
+			movieup.setCategories(movieup.getCategories());
+		else {
+			movieup.getCategories().removeAll(movieup.getCategories());
+			movie.getCategories().forEach(cat -> {
+				Optional<Category> findCat = categorieRepository.findByName(cat.getName());
+		 		if (findCat.isPresent()) {
+					movieup.getCategories().add(findCat.get());
+				} else {
+					Category categorie = Category.builder().description(cat.getDescription())
+							.name(cat.getName()).build();
+					movieup.getCategories().add(categorie);
+					categorieRepository.save(categorie);
+				}
+			});	
+		}
+		if (movie.getImages() == null)
+			movieup.setImages(movieup.getImages());
+		else
+			movieup.setImages(ImageMapper.INSTANCE.mapImages(movie.getImages()));
 
-        return movieResponseCovers.stream().collect(Collectors.toSet());
-    }
+		return mapper.entityToResponses(movieRepository.save(movieup));
+	}
 
-    @Override
-    public Page<Movie> getAllPaginations(Pageable pageable) {
-        return movieRepository.findAll(pageable);
-    }
+	@Override
+	public List<MovieResponseCover> getAllWithCover() {
+		List<MovieResponseCover> movieResponseCovers = new ArrayList<>();
+		movieRepository.findAll().forEach(movie -> {
+			MovieResponseCover movieResponseCover = MovieResponseCover.builder().description(movie.getDescription())
+					.director(DirectorMapper.INSTANCE.entityToResponse(movie.getDirector())).id(movie.getId()).title(movie.getTitle())
+					.timestamp(movie.getTimestamp()).build();
 
-    @Override
-    public Map<String, Object> getAllWithCoverPaginations(String title, Pageable pageable) {
-        List<MovieResponseCover> movieResponseCovers = new ArrayList<>();
-        Page<Movie> movies = (title==null) ? movieRepository.findAll(pageable)
-                : movieRepository.findByTitleContainingOrderByTimestampDesc(title,pageable);
-        movies.getContent().forEach(
-                movie -> {
-                    MovieResponseCover movieResponseCover = MovieResponseCover.builder()
-                            .id(movie.getId())
-                            .description(movie.getDescription())
-                            .title(movie.getTitle())
-                            .director(DirectorMapper.INSTANCE.entityToResponse(movie.getDirector()))
-                            .timestamp(movie.getTimestamp())
-                            .build();
+			Optional<Image> cover = movie.getImages().stream().filter(img -> img.getIsCover()).findFirst();
+			if (cover.isPresent()) {
+				ImageResponse coverResponse = ImageResponse.builder().id(cover.get().getId())
+						.imageLink(cover.get().getImageLink()).imageName(cover.get().getFileName())
+						.imageType(cover.get().getImageType()).build();
+				movieResponseCover.setCover(coverResponse);
+			}
+			movieResponseCovers.add(movieResponseCover);
+		});
+		return movieResponseCovers;
+	}
+	
+	@Override
+	public Map<String, Object> getAllWithCoverPaginations(String title, Pageable pageable) {
+		List<MovieResponseCover> movieResponseCovers = new ArrayList<>();
+		Page<Movie> movies = (title.isBlank()) ? movieRepository.findAll(pageable)
+				: movieRepository.findByTitleContainingOrderByTimestampDesc(title, pageable);
+		movies.getContent().forEach(movie -> {
+			MovieResponseCover movieResponseCover = MovieResponseCover.builder()
+					.description(movie.getDescription())
+					.title(movie.getTitle())
+					.director(DirectorMapper.INSTANCE.entityToResponse(movie.getDirector()))
+					.id(movie.getId())
+					.timestamp(movie.getTimestamp())
+					.build();
 
-                    Optional<Image> cover = movie.getImages().stream()
-                            .filter(img -> img.getIsCover())
-                            .findFirst();
-                    if(cover.isPresent()){
-                        ImageResponse coverResponse = ImageResponse.builder()
-                                .id(cover.get().getId())
-                                .imageLink(cover.get().getImageLink())
-                                .imageName(cover.get().getFileName())
-                                .imageType(cover.get().getImageType())
-                                .build();
-                    }
-                }
-        );
-        Map<String,Object> moviesResponse = new HashMap<>();
-        moviesResponse.put("content",movieResponseCovers);
-        moviesResponse.put("currentPage",movies.getNumber());
-        moviesResponse.put("totalElements",movies.getTotalElements());
-        moviesResponse.put("totalPages",movies.getTotalPages());
-        return moviesResponse;
-    }
+			Optional<Image> cover = movie.getImages()
+					.stream()
+					.filter(img -> img.getIsCover()).findFirst();
+			if (cover.isPresent()) {
+				ImageResponse coverResponse = ImageResponse.builder().id(cover.get().getId())
+						.imageLink(cover.get().getImageLink()).imageName(cover.get().getFileName())
+						.imageType(cover.get().getImageType()).build();
+				movieResponseCover.setCover(coverResponse);
+			}
+			movieResponseCovers.add(movieResponseCover);
+		});
+		Map<String, Object> moviesResponse = new HashMap<>();
+		moviesResponse.put("content", movieResponseCovers);
+		moviesResponse.put("currentPage", movies.getNumber());
+		moviesResponse.put("totalElements", movies.getTotalElements());
+		moviesResponse.put("totalPages", movies.getTotalPages());
+		return moviesResponse;
+	}
+
 }
