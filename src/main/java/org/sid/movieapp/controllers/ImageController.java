@@ -1,7 +1,9 @@
 package org.sid.movieapp.controllers;
 
-import org.apache.coyote.Response;
-import org.sid.movieapp.entities.Image;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
+
 import org.sid.movieapp.exceptions.NotFoundException;
 import org.sid.movieapp.mappers.ImageMapper;
 import org.sid.movieapp.models.responses.ImageResponse;
@@ -14,15 +16,18 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Path;
-
 @RestController
+@CrossOrigin(origins = { "http://localhost:4200" })
 @RequestMapping("/api/movie")
 public class ImageController {
     @Autowired
@@ -37,6 +42,7 @@ public class ImageController {
                 .path("/download/")
                 .path(saveImage.getId())
                 .toUriString();
+		saveImage.setImageLink(imageUrl);
         imageService.editImage(ImageMapper.INSTANCE.responseToRequest(saveImage)) ;
         ImageResponse response = ImageResponse.builder()
                 .id(saveImage.getId())

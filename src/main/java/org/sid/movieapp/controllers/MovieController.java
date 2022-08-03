@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 
 @RestController
+@CrossOrigin(origins = { "http://localhost:4200" })
 @RequestMapping("/api/movie")
 public class MovieController {
     @Autowired

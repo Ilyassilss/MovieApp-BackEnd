@@ -1,26 +1,40 @@
 package org.sid.movieapp.services.Impl;
 
-import org.sid.movieapp.entities.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.transaction.Transactional;
+
+import org.sid.movieapp.entities.Actor;
+import org.sid.movieapp.entities.Category;
+import org.sid.movieapp.entities.Director;
+import org.sid.movieapp.entities.Image;
+import org.sid.movieapp.entities.Movie;
 import org.sid.movieapp.exceptions.AlreadyExistsException;
 import org.sid.movieapp.exceptions.NotFoundException;
 import org.sid.movieapp.mappers.ActorMapper;
 import org.sid.movieapp.mappers.CategoryMapper;
 import org.sid.movieapp.mappers.DirectorMapper;
 import org.sid.movieapp.mappers.MovieMapper;
-import org.sid.movieapp.models.requests.DirectorRequest;
 import org.sid.movieapp.models.requests.MovieRequest;
 import org.sid.movieapp.models.responses.ImageResponse;
 import org.sid.movieapp.models.responses.MovieResponseCover;
-import org.sid.movieapp.repositories.*;
+import org.sid.movieapp.repositories.ActorRepository;
+import org.sid.movieapp.repositories.CategoryRepository;
+import org.sid.movieapp.repositories.DirectorRepository;
+import org.sid.movieapp.repositories.ImageRepository;
+import org.sid.movieapp.repositories.MovieRepository;
 import org.sid.movieapp.services.MovieService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import javax.transaction.Transactional;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class MovieServiceImpl implements MovieService {
