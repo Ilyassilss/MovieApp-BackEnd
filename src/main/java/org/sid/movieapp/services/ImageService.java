@@ -1,13 +1,12 @@
 package org.sid.movieapp.services;
 
-import org.sid.movieapp.entities.Image;
+import java.io.IOException;
+import java.nio.file.Path;
+
 import org.sid.movieapp.exceptions.NotFoundException;
 import org.sid.movieapp.models.requests.ImageRequest;
 import org.sid.movieapp.models.responses.ImageResponse;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.nio.file.Path;
 
 public interface ImageService {
 

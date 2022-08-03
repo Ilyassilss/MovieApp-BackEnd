@@ -15,6 +15,8 @@ public interface ImageMapper {
 
     Set<ImageResponse> mapImage(Set<Image> images);
 
+    Set<Image> mapImages(Set<ImageRequest> set);
+    
     Image requestToEntity(ImageRequest imageRequest);
 
     ImageRequest responseToRequest(ImageResponse imageResponse);

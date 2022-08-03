@@ -13,8 +13,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Set;
 
 @RestController
+@CrossOrigin(origins = { "http://localhost:4200" })
 @RequestMapping("/api/actor")
-public class ActorCategory {
+public class ActorController {
     @Autowired
     private ActorService actorService ;
 

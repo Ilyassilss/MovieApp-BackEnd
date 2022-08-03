@@ -21,6 +21,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 
+import javax.transaction.Transactional;
+
 @Service
 public class ImageServiceImpl implements ImageService {
 
@@ -65,6 +67,7 @@ public class ImageServiceImpl implements ImageService {
         ) ;
     }
 
+	@Transactional
     @Override
     public ImageResponse saveImageLocal(Long movieID, MultipartFile file, Boolean isCover) throws IOException,NotFoundException {
         Optional<Movie> movie = movieRepository.findById(movieID);
@@ -81,7 +84,7 @@ public class ImageServiceImpl implements ImageService {
                 imageRepository.updateAllCover(movieID);
             String imageUrl = ServletUriComponentsBuilder
                     .fromCurrentContextPath()
-                    .path("api/movie")
+                    .path("/api/movie")
                     .path("/downloadFile/")
                     .path(image.getId())
                     .toUriString();
