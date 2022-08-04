@@ -210,8 +210,12 @@ public class MovieServiceImpl implements MovieService {
 	public List<MovieResponseCover> getAllWithCover() {
 		List<MovieResponseCover> movieResponseCovers = new ArrayList<>();
 		movieRepository.findAll().forEach(movie -> {
-			MovieResponseCover movieResponseCover = MovieResponseCover.builder().description(movie.getDescription())
-					.director(DirectorMapper.INSTANCE.entityToResponse(movie.getDirector())).id(movie.getId()).title(movie.getTitle())
+			MovieResponseCover movieResponseCover = MovieResponseCover.builder()
+					.description(movie.getDescription())
+					.director(DirectorMapper.INSTANCE.entityToResponse(movie.getDirector()))
+					.id(movie.getId())
+					.title(movie.getTitle())
+					.categories(CategoryMapper.INSTANCE.mapCategory(movie.getCategories()))
 					.timestamp(movie.getTimestamp()).build();
 
 			Optional<Image> cover = movie.getImages().stream().filter(img -> img.getIsCover()).findFirst();

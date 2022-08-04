@@ -11,4 +11,5 @@ import lombok.NoArgsConstructor;
 public class DirectorResponse {
     private String name ;
     private String phone ;
+    private String photoLink;
 }
