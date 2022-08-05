@@ -14,7 +14,7 @@ public interface ImageMapper {
     ImageMapper INSTANCE = Mappers.getMapper(ImageMapper.class);
 
     Set<ImageResponse> mapImage(Set<Image> images);
-
+    
     Image requestToEntity(ImageRequest imageRequest);
 
     ImageRequest responseToRequest(ImageResponse imageResponse);

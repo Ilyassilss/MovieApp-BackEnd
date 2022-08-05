@@ -29,6 +29,7 @@ public class Director {
     private Long id ;
     private String name ;
     private String phone ;
+    private String photoLink;
 
     @OneToMany(mappedBy = "director")
     @JsonBackReference

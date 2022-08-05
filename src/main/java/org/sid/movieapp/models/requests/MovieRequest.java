@@ -20,18 +20,15 @@ public class MovieRequest {
     @Size(min = 3,max = 100)
     private String title ;
 
-    @NotNull
     @Size(min = 3 , max = 255)
     private String description ;
-
-    @NotNull
+    
     @Valid
     private DirectorRequest director ;
 
-    @NotNull
     private Set<ActorRequest> actors ;
+
     private Set<ImageRequest> images ;
 
-    @NotNull
     private Set<CategoryRequest> categories ;
 }

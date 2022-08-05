@@ -1,5 +1,6 @@
 package org.sid.movieapp.mappers;
 
+import java.util.List;
 import java.util.Set;
 
 import org.mapstruct.Mapper;
@@ -14,12 +15,14 @@ public interface MovieMapper {
     MovieMapper INSTANCE = Mappers.getMapper(MovieMapper.class);
 
     Set<MovieResponseCover> mapMovie(Set<Movie> movies);
+    
+    List<MovieResponseCover> mapMovie(List<Movie> movies);
 
     Set<Movie> mapMovieResponse(Set<MovieRequest> movies);
 
     Movie requestToEntity(MovieRequest movieRequest);
 
     MovieResponseCover entityToResponse(Movie movie);
-
-	MovieResponse entityToResponses(Movie movie);
+    
+    MovieResponse entityToResponses(Movie movie);
 }

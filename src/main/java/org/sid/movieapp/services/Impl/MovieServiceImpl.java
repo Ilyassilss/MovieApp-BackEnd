@@ -123,7 +123,9 @@ public class MovieServiceImpl implements MovieService {
 			newMovie.setDirector(findDirector.get());
 		} else {
 			Director director = Director.builder().name(movie.getDirector().getName())
-					.phone(movie.getDirector().getPhone()).build();
+					.phone(movie.getDirector().getPhone())
+					.photoLink(movie.getDirector().getPhotoLink())
+					.build();
 			directorRepository.save(director);
 			newMovie.setDirector(director);
 		}
@@ -210,8 +212,12 @@ public class MovieServiceImpl implements MovieService {
 	public List<MovieResponseCover> getAllWithCover() {
 		List<MovieResponseCover> movieResponseCovers = new ArrayList<>();
 		movieRepository.findAll().forEach(movie -> {
-			MovieResponseCover movieResponseCover = MovieResponseCover.builder().description(movie.getDescription())
-					.director(DirectorMapper.INSTANCE.entityToResponse(movie.getDirector())).id(movie.getId()).title(movie.getTitle())
+			MovieResponseCover movieResponseCover = MovieResponseCover.builder()
+					.description(movie.getDescription())
+					.director(DirectorMapper.INSTANCE.entityToResponse(movie.getDirector()))
+					.id(movie.getId())
+					.title(movie.getTitle())
+					.categories(CategoryMapper.INSTANCE.mapCategory(movie.getCategories()))
 					.timestamp(movie.getTimestamp()).build();
 
 			Optional<Image> cover = movie.getImages().stream().filter(img -> img.getIsCover()).findFirst();
@@ -237,10 +243,10 @@ public class MovieServiceImpl implements MovieService {
 				: movieRepository.findByTitleContainingOrderByTimestampDesc(title, pageable);
 		movies.getContent().forEach(movie -> {
 			MovieResponseCover movieResponseCover = MovieResponseCover.builder()
-					.id(movie.getId())
-					.title(movie.getTitle())
 					.description(movie.getDescription())
+					.title(movie.getTitle())
 					.director(DirectorMapper.INSTANCE.entityToResponse(movie.getDirector()))
+					.id(movie.getId())
 					.timestamp(movie.getTimestamp())
 					.build();
 

@@ -23,6 +23,7 @@ public class ActorRequest {
 
     @NotNull
     private int age ;
+    
     private String photoLink ;
 
 }

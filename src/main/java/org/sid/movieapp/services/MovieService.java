@@ -29,4 +29,5 @@ public interface MovieService {
 	MovieResponse update(Long id, MovieRequest movie);
 
 	Page<Movie> getAllPaginations(Pageable pageable);
+
 }
