@@ -19,11 +19,11 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "director")
+@Builder
 @Setter
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@NoArgsConstructor
 public class Director {
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id ;

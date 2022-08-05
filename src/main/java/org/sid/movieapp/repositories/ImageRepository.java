@@ -17,4 +17,5 @@ public interface ImageRepository extends JpaRepository<Image,String> {
     @Modifying
     @Query("UPDATE Image i SET i.isCover=0 WHERE i.movie.id= :movie_id")
     Integer updateAllCover(@Param("movie_id") Long movieId);
+
 }

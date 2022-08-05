@@ -28,11 +28,11 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "movie")
+@Builder
 @Setter
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@NoArgsConstructor
 public class Movie {
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id ;

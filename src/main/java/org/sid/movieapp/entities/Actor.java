@@ -19,11 +19,11 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "actor")
+@Builder
 @Setter
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Actor {
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id ;

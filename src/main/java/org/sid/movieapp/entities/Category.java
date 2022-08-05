@@ -19,11 +19,11 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "category")
+@Builder
 @Setter
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@NoArgsConstructor
 public class Category {
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id ;

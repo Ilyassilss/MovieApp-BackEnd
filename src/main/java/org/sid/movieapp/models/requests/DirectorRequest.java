@@ -18,8 +18,9 @@ public class DirectorRequest {
     @Size(min = 3 , max = 50)
     private String name ;
 
-    @NotNull
     @Pattern(regexp = "^[+]*[(]{0,1}[0-9]{1,4}[)]{0,1}[-\\s\\./0-9]*$")
     private String phone ;
+
+    private String photoLink;
 
 }

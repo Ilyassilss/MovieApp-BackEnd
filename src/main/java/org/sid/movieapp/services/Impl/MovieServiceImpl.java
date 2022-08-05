@@ -96,7 +96,7 @@ public class MovieServiceImpl implements MovieService {
 
 		if (movie.getActors() != null && !movie.getActors().isEmpty()) {
 			movie.getActors().forEach(act -> {
-				Optional<Actor> findActor = actorRepository.findByFirstName(act.getFirstName());
+				Optional<Actor> findActor = actorRepository.findByFirstNameAndLastName(act.getFirstName(), act.getLastName());
 				if (findActor.isPresent()) {
 					newMovie.getActors().add(findActor.get());
 				} else {
@@ -123,7 +123,9 @@ public class MovieServiceImpl implements MovieService {
 			newMovie.setDirector(findDirector.get());
 		} else {
 			Director director = Director.builder().name(movie.getDirector().getName())
-					.phone(movie.getDirector().getPhone()).build();
+					.phone(movie.getDirector().getPhone())
+					.photoLink(movie.getDirector().getPhotoLink())
+					.build();
 			directorRepository.save(director);
 			newMovie.setDirector(director);
 		}
@@ -220,9 +222,13 @@ public class MovieServiceImpl implements MovieService {
 
 			Optional<Image> cover = movie.getImages().stream().filter(img -> img.getIsCover()).findFirst();
 			if (cover.isPresent()) {
-				ImageResponse coverResponse = ImageResponse.builder().id(cover.get().getId())
-						.imageLink(cover.get().getImageLink()).imageName(cover.get().getFileName())
-						.imageType(cover.get().getImageType()).build();
+				ImageResponse coverResponse = ImageResponse.builder()
+						.id(cover.get().getId())
+						.imageLink(cover.get().getImageLink())
+						.imageName(cover.get().getFileName())
+						.imageType(cover.get().getImageType())
+						.fileName(cover.get().getFileName())
+						.build();
 				movieResponseCover.setCover(coverResponse);
 			}
 			movieResponseCovers.add(movieResponseCover);
@@ -248,9 +254,13 @@ public class MovieServiceImpl implements MovieService {
 					.stream()
 					.filter(img -> img.getIsCover()).findFirst();
 			if (cover.isPresent()) {
-				ImageResponse coverResponse = ImageResponse.builder().id(cover.get().getId())
-						.imageLink(cover.get().getImageLink()).imageName(cover.get().getFileName())
-						.imageType(cover.get().getImageType()).build();
+				ImageResponse coverResponse = ImageResponse.builder()
+						.id(cover.get().getId())
+						.imageLink(cover.get().getImageLink())
+						.imageName(cover.get().getFileName())
+						.imageType(cover.get().getImageType())
+						.fileName(cover.get().getFileName())
+						.build();
 				movieResponseCover.setCover(coverResponse);
 			}
 			movieResponseCovers.add(movieResponseCover);

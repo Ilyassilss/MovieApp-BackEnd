@@ -20,11 +20,11 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "image")
+@Builder
 @Setter
 @Getter
-@NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@NoArgsConstructor
 public class Image {
     @Id @GeneratedValue(generator = "uuid")
     @GenericGenerator(name = "uuid" ,strategy = "uuid2")

@@ -15,9 +15,9 @@ public interface ActorMapper {
 
     Set<ActorResponse> mapActor(Set<Actor> actors);
 
-    Set<Actor> mapActors(Set<ActorRequest> actors);
-
     Actor requestToEntity(ActorRequest actorRequest);
 
     ActorResponse entityToResponse(Actor actor);
+
+	Set<Actor> mapActors(Set<ActorRequest> actors);
 }
